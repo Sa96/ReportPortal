@@ -1,0 +1,616 @@
+{% block midpart %}
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE-edge">
+        <meta name="viewport" content="width=content-width initial-scale=1.0">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
+        <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+        <title>Category Wise Sales Report</title>
+        <style>
+            @import url('https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&display=swap');
+            *{
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+                font-family:  "Poppins", sans-serif;
+            }
+            :root{
+                --blue: #287bff;
+                --white: #fff;
+                --grey:#f5f5f5;
+                --black1: #222;
+                --black2:#999;
+                --black3:#25272e;           
+            }
+            body{
+                min-height: 100vh;
+                overflow-x: hidden;
+            }
+            .container{
+                position: relative;
+                width: 100%;
+            }
+            .navigation{
+                position: fixed;
+                width: 300px;
+                height: 100%;
+                background-color: var(--blue);
+                border-left: 10px solid var(--blue);
+                transition: 0.5s;
+                overflow: hidden;
+            }
+            .navigation.active{
+                width: 80px;
+            }
+            .navigation ul{
+                position: absolute;
+                top:0;
+                left: 0;
+                width: 100%;
+            }
+            .navigation ul li{
+                position: relative;
+                width:100%;
+                list-style: none;
+                border-top-left-radius: 30px;
+                border-bottom-left-radius: 30px;
+            }
+            .navigation ul li:hover{
+                background: var(--white);
+            }
+            .navigation ul li:nth-child(1)
+            {
+                margin-bottom: 40px;
+                pointer-events: none;
+            }
+            .navigation ul li a{
+                position: relative;
+                display: block;
+                width: 100;
+                display: flex;
+                text-decoration: none;
+                color: var(--white);
+            }
+            .navigation ul li:hover a{
+                color: var(--blue);
+            }
+            .navigation ul li a .icon{
+                position: relative;
+                display: block;
+                min-width: 60px;
+                height: 60px;
+                line-height: 70px;
+                text-align: center;
+            }
+            .navigation ul li a .icon ion-icon{
+                font-size: 1.75em;  
+            }
+            .navigation ul li a .title{
+                position: relative;
+                display: block;
+                padding: 0 10px;
+                height: 60px;
+                line-height: 60px;
+                text-align: start;
+                white-space: nowrap;
+            }
+            .main{
+                position: absolute;
+                width: calc(100% - 300px);
+                left: 300px;
+                min-height: 100vh;
+                transition: 0.5s;
+            }
+            .main.active{
+                width: calc(100% - 80px);
+                left: 80px;
+            }
+            .topbar{
+                width: 100%;
+                height: 60px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 0 10px;
+            }
+            .toggle{
+                position: relative;
+                width: 60px;
+                height: 60px;
+                background:#ccc ;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                font-size: 2.5em;
+                cursor: pointer;
+            }
+            .search{
+                position: relative;
+                width: 400px;
+                margin: 0 10px;
+                display: block;
+                grid-template-columns: repeat(7, 1fr);
+            }
+            .search label{
+                position: relative;
+                width: 100%;
+            }
+            .search label input{
+                width: 100%;
+                height: 40px;
+                border-radius: 40px;
+                padding: 5px 20px;
+                padding-left: 35px;
+                font-size: 18px;
+                outline: none;
+                border: 1px solid var(--black2);
+                
+            }
+            .search label ion-icon{
+                position: absolute;
+                top:0;
+                left: 9px;
+                font-size: 1.2em;
+            }
+            .user{
+                position: relative;
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                overflow: hidden;
+                cursor:pointer;
+            }
+            .user ion-icon
+            {
+                position: absolute;
+                top:0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+            .filter{
+                position: relative;
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                overflow: hidden;
+                cursor:pointer;
+            }
+            .filter button ion-icon
+            {
+                position: absolute;
+                top:0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+            .filter button ion-icon:hover
+            {
+                background: var(--blue);
+                color: var(--white);
+            }
+            .download{
+                position: relative;
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                overflow: hidden;
+                cursor:pointer;
+            }
+            .download button ion-icon
+            {
+                position: absolute;
+                top:0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+            .download button ion-icon:hover
+            {
+                background: var(--blue);
+                color: var(--white);
+            }
+            .cardBox{
+                position: relative;
+                width: 100%;
+                padding: 20px;
+                display: grid;
+                grid-template-columns: repeat(4,1fr);
+                grid-gap: 30px;
+            }
+            .cardBox .card{
+                position: relative;
+                width: 100%;
+                padding: 30px;
+                border-radius: 30px;
+                display: flex;
+                justify-content: space-between;
+                cursor: pointer;
+                box-shadow: 0 7px 25px rgba(0,0,0,0.8);
+            }
+            .cardBox .card .numbers{
+                position: relative;
+                font-weight: 500;
+                font-size: 2.5em;
+                color: var(--blue);
+            }
+            .cardBox .card .cardName{
+                color: var(--black2);
+                font-size: 1.1em;
+                margin-top: 5px;
+            }
+            .cardBox .card .iconBx{
+                font-size: 3.5em;
+                color: var(--black2);
+            }
+            .cardBox .card:hover{
+                background: var(--blue);
+            }
+            .cardBox .card:hover .numbers,
+            .cardBox .card:hover .cardName,
+            .cardBox .card:hover .iconBx{
+                color: var(--white);
+            }
+            .details{
+                position: relative;
+                width: 100%;
+                padding: 2px;
+                display: grid;
+                grid-template-columns: 3fr;
+                grid-gap: 30px;
+                margin-top: 10px;
+            }
+            .details .salesReportOrders{
+                position: relative;
+                display: grid;
+                min-height: 500px;
+                background: var(--white);
+                padding: 20px;
+                box-shadow: 0 7px 25px rgba(0,0,0,0.08);
+                border-radius: 20px;
+            }
+            .cardHeader{
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start;
+            }
+            .cardHeader h2{
+                font-weight: 600;
+                color: var(--blue);
+            }
+            .details table{
+                width: 100%;
+                border-collapse: collapse;
+                margin-top: 10px;
+            }
+            .details table thead td{
+                font-weight: 600;
+            }
+            .details .salesReportOrders table tr{
+                color: var(--black1);
+                border-bottom: 1px solid rgba(0,0,0,0.1);
+            }
+            .details .salesReportOrders table tr:last-child {
+                border-bottom: none;
+            }
+            .details .salesReportOrders table tbody tr:hover{
+                background-color: var(--blue);
+                color: var(--white);
+            }
+            .details .salesReportOrders table tbody tr td{
+                padding: 10px;
+            }
+            .details .salesReportOrders table tbody tr td:last-child{
+                text-align: end;
+            }
+            .details .salesReportOrders table tbody tr td:nth-child(3),
+            .details .salesReportOrders table tbody tr td:nth-child(4),
+            .details .salesReportOrders table tbody tr td:nth-child(5),
+            .details .salesReportOrders table tbody tr td:nth-child(6)
+            {
+                text-align: right;
+            }
+            .details .salesReportOrders table tbody tr td:nth-child(1),
+            .details .salesReportOrders table tbody tr td:nth-child(2){
+                text-align: left;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="navigation">
+                <ul>
+                    <li>
+                        <a href="#">
+                            <span class="icon"><ion-icon name="home-outline"></ion-icon></span>
+                            <span class="title">Dashboard</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'sales_report' %}">
+                            <span class="icon"><ion-icon name="list-circle-outline"></ion-icon></span>
+                            <span class="title">Sales Report</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'item_wise_sales_report' %}">
+                            <span class="icon"><ion-icon name="list-circle-outline"></ion-icon></span>
+                            <span class="title">Item Wise Sales Report</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'category_wise_sales_report' %}">
+                            <span class="icon"><ion-icon name="list-circle-outline"></ion-icon></span>
+                            <span class="title">Category Wise Sales Report</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'vat_sales_report' %}">
+                            <span class="icon"><ion-icon name="list-circle-outline"></ion-icon></span>
+                            <span class="title">VAT Sales Report</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'customer_wise_sales_report' %}">
+                            <span class="icon"><ion-icon name="list-circle-outline"></ion-icon></span>
+                            <span class="title">Customer Wise Sales Report</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'logout' %}">
+                            <span class="icon"><ion-icon name="log-out-outline"></ion-icon></span>
+                            <span class="title">Sign Out</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            <!-- main -->
+            <div class="main">
+                <div class="topbar">
+                    <div class="toggle">
+                        <ion-icon name="menu-outline"></ion-icon>
+                    </div>
+                    <div class="title">
+                        <h3>Category Wise Sales Report</h3>
+                    </div>
+                    <!-- search -->
+                    <div class="search">
+                        {% csrf_token %}
+                        <label for="start_date">
+                            <input id="id_Start_Date" name="start_date" type="date" placeholder="Enter Start Date">
+                            <ion-icon name="calendar-outline"></ion-icon>
+                        </label>
+                    </div>
+                    <div class="search">
+                        <label for="end_date">
+                            <input id="id_End_Date" name="end_date" type="date" placeholder="Enter End Date">
+                            <ion-icon name="calendar-outline"></ion-icon>
+                        </label>
+                    </div>
+                    <div class="filter">
+                        <button type="button" id="filter-button">
+                            <ion-icon name="filter-circle-outline"></ion-icon>
+                        </button>
+                    </div>
+                    <div class="download">
+                        <button type="button" id="download-button">
+                            <ion-icon name="arrow-down-circle-outline"></ion-icon>                        
+                        </button>
+                    </div>
+
+                    <div class="user">
+                        <ion-icon name="person-circle-outline"></ion-icon>
+                    </div>
+                </div>
+                <!--Cards-->
+                <div class="cardBox">
+                    <div class="card">
+                        <div>
+                            <div class="numbers">
+                                <span id="id_totalQuantity" name="totalQuantity">{{ Total_Quantity|floatformat:2 }}</span>
+                            </div>
+                            <div class="cardName">Total Quantity</div>
+                        </div>
+                        <div class="iconBx">
+                            <ion-icon name="barbell-outline"></ion-icon>                    
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div>
+                            <div class="numbers">
+                                <span id="id_totalDisc" name="totalDisc">{{ Total_DISC|floatformat:2 }}</span>
+                            </div>
+                            <div class="cardName">Total DISC</div>
+                        </div>
+                        <div class="iconBx">
+                            <ion-icon name="pricetag-outline"></ion-icon>                    
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div>
+                            <div class="numbers">
+                                <span id="id_totalPrice" name="totalPrice">{{ Total_Price|floatformat:2 }}</span>
+                            </div>
+                            <div class="cardName">Total Price</div>
+                        </div>
+                        <div class="iconBx">
+                            <ion-icon name="cash-outline"></ion-icon>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div>
+                            <div class="numbers">
+                                <span id="id_totalAmount" name="totalAmount">{{ TotalAmount|floatformat:2 }}</span>
+                            </div>
+                            <div class="cardName">Total Amount</div>
+                        </div>
+                        <div class="iconBx">
+                            <ion-icon name="cash-outline"></ion-icon>
+                        </div>
+                    </div>
+                </div>
+                <!--details list-->
+                <div class="details">
+                    <div class="salesReportOrders">
+                        <div class="cardHeader">
+                            <h2>Category Wise Sales Report</h2>
+                        </div>
+                        <table>
+                            <thead name="sales_Report_details" id="id_sales_Report_details">
+                                <tr>
+                                    <th>Category ID</th>
+                                    <th>Category Name</th>
+                                    <th>Selling Price</th>
+                                    <th>Quantity</th>
+                                    <th>DISC</th>
+                                    <th>Total Cost</th>      
+                                </tr>
+                            </thead>
+                            <tbody id="id_sales_Report_body" name="sales_Report_body">
+                                {% if date_ranges %}
+                                {% for d in filtered_data %}
+                                    <tr>
+                                        <td>{{d.Category_ID}}-{{d.Item_ID}}</td>
+                                        <td>{{d.Category_Name}}-{{d.Item_Name}}</td>
+                                        <td>{{d.Selling_Price}}</td>
+                                        <td>{{d.Quantity}}</td>
+                                        <td>{{d.DISC}}</td>
+                                        <td>{{d.TotalAmount}}</td>
+                                    </tr>
+                                {% endfor %}    
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+        <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+        <script>
+            // MenuToggle
+            let toggle = document.querySelector('.toggle');
+            let navigation = document.querySelector('.navigation');
+            let main = document.querySelector('.main');
+
+            toggle.onclick = function(){
+                navigation.classList.toggle('active');
+                main.classList.toggle('active');
+            }
+
+            // add hovered class in selected list item
+            let list = document.querySelectorAll('.navigation li');
+            function activeLink(){
+                list.forEach((item) =>
+                item.classList.remove('hover'));
+                this.classList.add('hovered');
+            }
+            list.forEach((item) =>
+            item.addEventListener('mouseover',activeLink));
+        </script>
+        <script>
+            function isValidDateFormat(dateString) 
+            {
+                // Regular expression to check if the date string is in 'YYYY-MM-DD' format
+                const dateFormatRegex = /^\d{4}-\d{2}-\d{2}$/;
+                return dateFormatRegex.test(dateString);
+            }
+        </script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function(){
+                function filter_data() {
+                    const startDateInputs = document.getElementsByName('start_date');
+                    const endDateInputs = document.getElementsByName('end_date');
+
+                    const dateRanges = [];
+
+                    for (let i = 0; i < startDateInputs.length; i++) {
+                        const startDate = startDateInputs[i].value;
+                        const endDate = endDateInputs[i].value;
+
+                        const fromDate = new Date(startDate);
+                        const toDate = new Date(endDate);
+
+                        if (!isValidDateFormat(startDate) || !isValidDateFormat(endDate)) {
+                            alert("Please select both start and end dates for all date ranges in the format 'YYYY-MM-DD'.");
+                            return;
+                        }
+            
+                        dateRanges.push({
+                            'from_date': fromDate.toISOString().split('T')[0],
+                            'to_date': toDate.toISOString().split('T')[0]
+                        });
+                    }   
+                    const csrfToken = document.querySelector("[name=csrfmiddlewaretoken]").value;
+                    dateRanges.forEach((dateRange, index) => {
+                        $.ajax({
+                            type: "POST",
+                            url: '/category_wise_sales_report/',
+                            data: {
+                                'start_date': dateRange.from_date,
+                                'end_date': dateRange.to_date,
+                                'csrfmiddlewaretoken': csrfToken
+                            },
+                            success: function (response) {
+                                console.log("Received data:", response);
+
+                                const tbody = document.getElementById('id_sales_Report_body');
+                                const totalQuantityElement = document.getElementById('id_totalQuantity');
+                                const totalDiscElement = document.getElementById('id_totalDisc');
+                                const totalPriceElement = document.getElementById('id_totalPrice');
+                                const totalAmountElement = document.getElementById('id_totalAmount');
+
+                                if (!tbody || !totalQuantityElement || !totalDiscElement || !totalPriceElement || !totalAmountElement) {
+                                    console.error("Tbody or TotalQuantity or TotalDisc or TotalPriceElement or TotalAmountElement element not found");
+                                    return;
+                                }
+                                
+                                tbody.innerHTML = '';
+                                let totalQuantity = 0;
+                                let totalDisc = 0;
+                                let totalPrice = 0;
+                                let totalAmount = 0;
+
+                                response.forEach(item => {
+                                    totalQuantity += item.Quantity
+                                    totalDisc += item.DISC
+                                    totalPrice += item.Selling_Price
+                                    totalAmount += item.TotalAmount
+
+                                    const row = document.createElement('tr');
+                                    row.innerHTML = `
+                                        <td>${item.Category_ID} - ${item.Item_ID}</td>
+                                        <td>${item.Category_Name} - ${item.Item_Name}</td>
+                                        <td>${item.Selling_Price.toFixed(2)}</td>
+                                        <td>${item.Quantity.toFixed(2)}</td>
+                                        <td>${item.DISC.toFixed(2)}</td>
+                                        <td>${item.TotalAmount.toFixed(2)}</td>
+                                    `;
+                                    tbody.appendChild(row);
+                                });
+                                totalQuantityElement.innerText = totalQuantity.toFixed(2);
+                                totalDiscElement.innerText = totalDisc.toFixed(2);
+                                totalPriceElement.innerText = totalPrice.toFixed(2);
+                                totalAmountElement.innerText = totalAmount.toFixed(2);
+                            },
+                            error: function (error) {
+                                console.error("Error:", error);
+                            }
+                        });
+                    });
+                }
+                document.getElementById('filter-button').addEventListener('click', filter_data);
+            });
+        </script>
+    </body>
+</html>
+{% endblock content %}
+{% endblock midpart %}
